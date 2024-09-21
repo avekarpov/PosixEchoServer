@@ -6,10 +6,14 @@
 #include <stdexcept>
 #include <functional>
 
+#define ERRNO strerror(errno)
+
+#define THROW_ERRNO throw std::runtime_error { ERRNO }
+
 #define CHECK_THROW_POSIX(__VALUE__) \
 do { \
     if ((__VALUE__) == -1) { \
-        throw std::runtime_error { strerror(errno) }; \
+        THROW_ERRNO; \
     } \
 } \
 while (false)

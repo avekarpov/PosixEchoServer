@@ -7,7 +7,12 @@ size_t readFull(const int fd, char* buffer, const size_t count_to_read) {
     size_t read_count = 0;
     while (read_count < count_to_read) {
         const auto chunk_size = read(fd, buffer + read_count, count_to_read - read_count);
-        CHECK_THROW_POSIX(chunk_size);
+        if (chunk_size == -1) {
+            if (errno == EAGAIN) {
+                break;
+            }
+            THROW_ERRNO;
+        }
 
         if (0 == chunk_size) {
             break;

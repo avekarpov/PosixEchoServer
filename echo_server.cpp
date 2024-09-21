@@ -8,8 +8,10 @@
 #include <iostream>
 #include <arpa/inet.h>
 
-#define INFO(__MESSAGE__) std::cout << "[i][EchoServer]: " << __MESSAGE__ << std::endl
-#define DEBUG(__MESSAGE__) std::cout << "[d][EchoServer]: " << __MESSAGE__ << std::endl;
+#define LOG(__LVL__, __MSG__) std::cout << "[" __LVL__ "][EchoServer]: " << __MSG__ << std::endl;
+#define ERROR(__MSG__) LOG("e", __MSG__)
+#define INFO(__MSG__) LOG("i", __MSG__)
+#define DEBUG(__MSG__) LOG("d", __MSG__)
 
 EchoServer::EchoServer(std::string host, const uint16_t port)
     : _host { host == "localhost" ? "127.0.0.1" : std::move(host) }
@@ -43,6 +45,10 @@ void EchoServer::start() {
 
     CHECK_THROW_POSIX(listen(_fd, MAX_CLIENTS));
 
+    loop();
+}
+
+void EchoServer::loop() const {
     while (_is_running.load()) {
         try {
             sockaddr_in client_addr { 0 };
@@ -86,11 +92,10 @@ void EchoServer::start() {
                 writeFull(client_fd, buffer.data(), read_count);
             }
 
-            // TODO: defer
             CHECK_THROW_POSIX(close(client_fd));
         }
         catch (...) {
-
+            ERROR("some error occurred, while handle client");
         }
     }
 }
@@ -112,6 +117,6 @@ EchoServer::~EchoServer() {
         stop();
     }
     catch (...) {
-
+        ERROR("some error occurred on destryction");
     }
 }

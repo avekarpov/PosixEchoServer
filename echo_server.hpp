@@ -19,6 +19,9 @@ public:
     ~EchoServer();
 
 private:
+    void loop() const;
+
+private:
     const std::string _host;
     const uint16_t _port;
 
